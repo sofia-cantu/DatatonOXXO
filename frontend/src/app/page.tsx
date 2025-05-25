@@ -1,103 +1,271 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState } from 'react';
+
+export default function Page() {
+  const [latitude, setLatitude] = useState<number | ''>('');
+  const [longitude, setLongitude] = useState<number | ''>('');
+  const [entorno, setEntorno] = useState<string>('Hogar');
+  const [porciento, setPorciento] = useState<number | ''>(66);
+  const [exito, setExito] = useState<string>('excelente');
+
+  const handleSubmit = () => {
+    if (latitude === '' || longitude === '') return;
+    console.log({ LATITUD_NUM: latitude, LONGITUD_NUM: longitude, ENTORNO_DES: entorno });
+    // Aquí podrías actualizar porciento y exito según la respuesta de tu API
+    // setPorciento(nuevoValor);
+    // setExito(nuevoEstado);
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+    <div className="container">
+      <header className="header">
+        <div className="input-row">
+          <div className="input-group">
+            <label>Latitud:</label>
+            <input
+              type="number"
+              placeholder="Ejemplo: 2.569107"
+              value={latitude}
+              onChange={(e) => setLatitude(e.target.value === '' ? '' : parseFloat(e.target.value))}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </div>
+          <div className="input-group">
+            <label>Entorno:</label>
+            <select value={entorno} onChange={(e) => setEntorno(e.target.value)}>
+              {['Base', 'Hogar', 'Peatonal', 'Receso'].map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
+          <div className="input-group">
+            <label>Longitud:</label>
+            <input
+              type="number"
+              placeholder="Ejemplo: -100.21261"
+              value={longitude}
+              onChange={(e) => setLongitude(e.target.value === '' ? '' : parseFloat(e.target.value))}
+            />
+          </div>
+        </div>
+      </header>
+
+      <div className="button-container">
+        <button className="play-button" onClick={handleSubmit}>
+          <svg viewBox="0 0 24 24">
+            <polygon points="9.5,7.5 16.5,12 9.5,16.5" />
+          </svg>
+        </button>
+      </div>
+
+      <main className="result">
+        <div className="text-block">
+          <h2>La localización en esta zona es <span className="highlight">{exito}</span>.</h2>
+          <p className="percent">
+            {exito === 'mejorable' 
+              ? <>Le falta aumentar <strong>{porciento}%</strong> de las ventas para el éxito</>
+              : <>Supera <strong>{porciento}%</strong> de las ventas esperadas para el éxito</>}
+          </p>
+          <p>El camino al éxito está cerca, por la naturaleza de la zona, te recomendamos tomar lo siguiente en mente:</p>
+          <ul>
+            <li>Punto 1</li>
+            <li>Punto 2</li>
+            <li>Punto 3</li>
+          </ul>
+          <p>Se recomienda bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla.</p>
+        </div>
+        <div className="map-placeholder">
+          <div className="map-box">Mapa cargando...</div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      <style jsx>{`
+        /* Layout */
+        .container {
+          max-width: 75rem;
+          margin: 0 auto;
+          font-family: Arial, sans-serif;
+        }
+        
+        .header {
+          display: flex;
+          flex-direction: column;
+          padding: 1.5625rem;
+          border-radius: 0.5rem;
+          height: 10rem;
+          background: #DF0024;
+          color: white;
+        }
+        
+        .input-row {
+          display: flex;
+          justify-content: space-between;
+          width: 100%;
+          gap: 1rem;
+        }
+        
+        .result {
+          display: flex;
+          margin: 4rem 2rem 6rem 4rem;
+        }
+        
+        .map-placeholder {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .button-container {
+          display: flex;
+          justify-content: center;
+          width: 100%;
+          margin-top: -1.5rem;
+          position: relative;
+          z-index: 1;
+        }
+        
+        /* Input Groups */
+        .input-group {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          min-width: 0;
+        }
+        
+        .input-group label {
+          margin-bottom: 0.5rem;
+          color: white;
+          font-weight: 600;
+          font-size: 1.125rem;
+        }
+        
+        .input-group input,
+        .input-group select {
+          width: 100%;
+          height: 3.5rem;
+          padding: 0.75rem 1rem;
+          box-sizing: border-box;
+          border: none;
+          border-radius: 0.5rem;
+          font-size: 1rem;
+          color: #374151;
+          background-color: white;
+          transition: box-shadow 0.2s;
+        }
+        
+        .input-group input:focus,
+        .input-group select:focus {
+          outline: 0.125rem solid #F6D300;
+        }
+        
+        /* Play Button */
+        .play-button {
+          width: 5rem;
+          height: 5rem;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          background: #F6D300;
+          outline: 10px solid #DF0024;
+          box-shadow: none;
+          transition: all 0.2s;
+          margin-bottom: 2rem;
+        }
+        
+        .play-button:hover {
+          transform: scale(1.05);
+          filter: brightness(0.95);
+        }
+        
+        .play-button svg {
+          width: 20rem;
+          height: 20rem;
+          fill: #DF0024;
+        }
+        
+        /* Text Block */
+        .text-block {
+          flex: 1;
+          padding-right: 1.25rem;
+          margin: 0 2rem 0 0;
+        }
+        
+        .text-block h2 {
+          font-size: 1.5rem;
+        }
+        
+        .text-block .highlight {
+          color: #DF0024;
+          text-decoration: underline;
+        }
+        
+        .text-block .percent {
+          font-size: 2rem;
+          margin: 0.625rem 0;
+        }
+        
+        .percent strong {
+          color: #DF0024;
+        }
+        
+        .text-block ul {
+          list-style: disc;
+          margin: 0.625rem 0 1.25rem 1.25rem;
+        }
+        
+        /* Map Box */
+        .map-box {
+          width: 100%;
+          height: 18.75rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 0.125rem solid #DF0024;
+          border-radius: 0.5rem;
+          color: #777;
+          font-style: italic;
+          margin: 0 2rem 0 0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 48rem) {
+          .input-row {
+            flex-direction: column;
+            gap: 0;
+            margin-bottom: 1rem;
+            height: auto;
+            padding-bottom: 2rem;
+            position: relative;
+            z-index: 2;
+            background: #DF0024;
+          }
+          
+          .input-group {
+            margin-bottom: 1rem;
+          }
+          
+          .header {
+            height: auto;
+            padding-bottom: 3rem;
+          }
+          
+          .button-container {
+            margin-top: -2.5rem;
+          }
+          
+          .result {
+            flex-direction: column;
+            margin-top: 0rem;
+          }
+          
+          .map-placeholder {
+            margin-top: 1.25rem;
+          }
+        }
+      `}</style>
     </div>
   );
 }
