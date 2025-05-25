@@ -1,4 +1,4 @@
-# Dataton con Oxxo! 🚀
+# Datathon con Oxxo! 🚀
 
 Este proyecto desarrolla un modelo predictivo para evaluar el éxito potencial de nuevas tiendas Oxxo, integrando variables clave como ubicación geográfica (latitud, longitud) y entorno (Base, Hogar, Peatonal, Receso). Además de predecir si la tienda será exitosa, el sistema genera un análisis con factores críticos y recomendaciones estratégicas personalizadas mediante un modelo de lenguaje (LLM). La solución incluye visualizaciones interactivas, como mapas y simulaciones de escenarios, para guiar decisiones de inversión. Con este proyecto, ofrecemos una herramienta integral para OXXO que combina precisión técnica con accionabilidad estratégica.
 
