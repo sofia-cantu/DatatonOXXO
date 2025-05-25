@@ -1,20 +1,74 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+
+const MapaTiendas = dynamic(
+  () => import('@/components/MapaTiendas'),
+  { ssr: false }
+);
 
 export default function Page() {
   const [latitude, setLatitude] = useState<number | ''>('');
   const [longitude, setLongitude] = useState<number | ''>('');
   const [entorno, setEntorno] = useState<string>('Hogar');
-  const [porciento, setPorciento] = useState<number | ''>(66);
-  const [exito, setExito] = useState<string>('excelente');
+  const [porciento, setPorciento] = useState<number | ''>(85);
+  const [exito, setExito] = useState<string>('buena');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [tiendas, setTiendas] = useState([]);
 
-  const handleSubmit = () => {
-    if (latitude === '' || longitude === '') return;
-    console.log({ LATITUD_NUM: latitude, LONGITUD_NUM: longitude, ENTORNO_DES: entorno });
-    // Aquí podrías actualizar porciento y exito según la respuesta de tu API
-    // setPorciento(nuevoValor);
-    // setExito(nuevoEstado);
+  // Fetch stores data on component mount
+  useEffect(() => {
+    fetch('http://localhost:8000/api/tiendas')
+      .then((res) => res.json())
+      .then((data) => setTiendas(data))
+      .catch(() => setTiendas([]));
+  }, []);
+
+  const handleSubmit = async () => {
+    if (latitude === '' || longitude === '') {
+      setError('Por favor, introduce latitud y longitud.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('http://localhost:8000/api/evaluar', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          LATITUD_NUM: Number(latitude),
+          LONGITUD_NUM: Number(longitude),
+          ENTORNO_DES: entorno
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('Respuesta Back:', data);
+      
+      // Actualiza el estado con la respuesta de la API
+      setPorciento(data.porciento || 0);
+      setExito(data.exito || 'mejorable');
+      
+    } catch (err) {
+      console.error('Error al conectar con la API:', err);
+      setError('Error al conectar con el servidor. Por favor, intenta nuevamente.');
+      // Valores por defecto en caso de error
+      setPorciento(0);
+      setExito('mejorable');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,12 +105,26 @@ export default function Page() {
       </header>
 
       <div className="button-container">
-        <button className="play-button" onClick={handleSubmit}>
-          <svg viewBox="0 0 24 24">
-            <polygon points="9.5,7.5 16.5,12 9.5,16.5" />
-          </svg>
+        <button 
+          className="play-button" 
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? (
+            <span>Cargando...</span>
+          ) : (
+            <svg viewBox="0 0 24 24">
+              <polygon points="9.5,7.5 16.5,12 9.5,16.5" />
+            </svg>
+          )}
         </button>
       </div>
+
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
 
       <main className="result">
         <div className="text-block">
@@ -74,9 +142,16 @@ export default function Page() {
           </ul>
           <p>Se recomienda bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla.</p>
         </div>
-        <div className="map-placeholder">
-          <div className="map-box">Mapa cargando...</div>
+        
+        {/* MAPA SIMPLIFICADO */}
+        <div className="map-section">
+          {tiendas.length > 0 ? (
+            <MapaTiendas data={tiendas} />
+          ) : (
+            <div className="map-loading">Cargando mapa...</div>
+          )}
         </div>
+
       </main>
 
       <style jsx>{`
@@ -107,13 +182,7 @@ export default function Page() {
         .result {
           display: flex;
           margin: 4rem 2rem 6rem 4rem;
-        }
-        
-        .map-placeholder {
-          flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          gap: 2rem;
         }
         
         .button-container {
@@ -175,9 +244,14 @@ export default function Page() {
           margin-bottom: 2rem;
         }
         
-        .play-button:hover {
+        .play-button:hover:not(:disabled) {
           transform: scale(1.05);
           filter: brightness(0.95);
+        }
+        
+        .play-button:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
         }
         
         .play-button svg {
@@ -189,8 +263,7 @@ export default function Page() {
         /* Text Block */
         .text-block {
           flex: 1;
-          padding-right: 1.25rem;
-          margin: 0 2rem 0 0;
+          margin-right: 2rem;
         }
         
         .text-block h2 {
@@ -216,18 +289,33 @@ export default function Page() {
           margin: 0.625rem 0 1.25rem 1.25rem;
         }
         
-        /* Map Box */
-        .map-box {
+        /* MAPA - CSS SIMPLIFICADO */
+        .map-section {
+          flex: 1;
+          height: 23rem;
+          border: 0.7rem solid #DF0024;
+          border-radius: 0.5rem;
+        }
+        
+        .map-loading {
           width: 100%;
-          height: 18.75rem;
+          height: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 0.7rem solid #DF0024;
-          border-radius: 0.5rem;
           color: #777;
           font-style: italic;
-          margin: 0 2rem 0 0;
+        }
+        
+        /* Error Message */
+        .error-message {
+          color: white;
+          background-color: #ff4444;
+          padding: 1rem;
+          margin: 1rem auto;
+          border-radius: 0.5rem;
+          max-width: 600px;
+          text-align: center;
         }
         
         /* Responsive */
@@ -259,10 +347,15 @@ export default function Page() {
           .result {
             flex-direction: column;
             margin-top: 0rem;
+            gap: 1rem;
           }
           
-          .map-placeholder {
-            margin-top: 1.25rem;
+          .text-block {
+            margin-right: 0;
+          }
+          
+          .map-section {
+            height: 300px;
           }
         }
       `}</style>
