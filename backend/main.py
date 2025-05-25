@@ -118,6 +118,9 @@ def predecir_y_optimizar_con_recomendacion(lat, lon, entorno, radio_km=5):
                 mensaje_exito = "mejorable"
                 porciento = int((0.6 - prob_init) * 100 / 0.6)  # Porcentaje faltante para llegar a regular
 
+        # FORMATEAR EL PORCENTAJE A MÁXIMO 4 DÍGITOS (3 decimales)
+        porciento = round(float(porciento), 2)
+
         print("\n-- RESULTADO OPTIMIZADO --")
         print(f"Mts2 óptimo: {mts2_opt:.2f}")
         print(f"Puertas refrigeración óptimo: {puertas_opt:.2f}")
@@ -151,7 +154,7 @@ def predecir_y_optimizar_con_recomendacion(lat, lon, entorno, radio_km=5):
         # RETORNAR EN EL FORMATO QUE ESPERA EL FRONTEND
         return {
             "exito": mensaje_exito,
-            "porciento": porciento,
+            "porciento": porciento,  # Ya formateado a máximo 3 decimales
             "detalles": {
                 "prediccion_inicial": {
                     "clase": int(pred_usuario),
