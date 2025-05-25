@@ -82,7 +82,6 @@ export default function Page() {
       <style jsx>{`
         /* Layout */
         .container {
-          max-width: 75rem;
           margin: 0 auto;
           font-family: Arial, sans-serif;
         }
@@ -91,7 +90,8 @@ export default function Page() {
           display: flex;
           flex-direction: column;
           padding: 1.5625rem;
-          border-radius: 0.5rem;
+          border-bottom-left-radius: 0.5rem;
+          border-bottom-right-radius: 0.5rem;
           height: 10rem;
           background: #DF0024;
           color: white;
@@ -169,8 +169,8 @@ export default function Page() {
           justify-content: center;
           cursor: pointer;
           background: #F6D300;
-          outline: 10px solid #DF0024;
-          box-shadow: none;
+          outline: 9px solid #DF0024;
+          border: 1px solid #DF0024;
           transition: all 0.2s;
           margin-bottom: 2rem;
         }
@@ -181,8 +181,8 @@ export default function Page() {
         }
         
         .play-button svg {
-          width: 20rem;
-          height: 20rem;
+          width: 30rem;
+          height: 30rem;
           fill: #DF0024;
         }
         
@@ -223,7 +223,7 @@ export default function Page() {
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 0.125rem solid #DF0024;
+          border: 0.7rem solid #DF0024;
           border-radius: 0.5rem;
           color: #777;
           font-style: italic;
