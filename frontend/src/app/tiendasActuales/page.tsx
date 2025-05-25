@@ -8,6 +8,14 @@ const MapaTiendas = dynamic(
   { ssr: false }
 );
 
+const VentasLineChart = dynamic(
+  () => import('@/components/VentasLineChart'),
+  { 
+    ssr: false,
+    loading: () => <div className="map-box">Cargando gráfica...</div>
+  }
+);
+
 // Tipo para los datos demográficos
 type DemographicData = {
   poblacion_total: number;
@@ -248,7 +256,7 @@ export default function Page() {
                     <div className="imagen">
                     <p>Grafica de ventas para tienda {tienda}:</p>
                     <div className="graph-placeholder">
-                        <div className="map-box">Grafica cargando...</div>
+                      <VentasLineChart tiendaId={Number(tienda)} />
                     </div>
                     </div>
                 </div>
