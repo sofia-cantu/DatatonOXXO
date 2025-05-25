@@ -1,25 +1,48 @@
-# Dataton con Oxxo! 🚀
+# Datathon con Oxxo! 🚀
 
-Este proyecto desarrolla un modelo predictivo para evaluar el éxito potencial de nuevas tiendas Oxxo, integrando variables clave como ubicación geográfica (latitud, longitud) y entorno (Base, Hogar, Peatonal, Receso). Además de predecir si la tienda será exitosa, el sistema genera un análisis con factores críticos y recomendaciones estratégicas personalizadas mediante un modelo de lenguaje (LLM). La solución incluye visualizaciones interactivas, como mapas de calor y simulaciones de escenarios, para guiar decisiones de inversión. Con este proyecto, ofrecemos una herramienta integral para OXXO que combina precisión técnica con accionabilidad estratégica.
+Este proyecto desarrolla un modelo predictivo para evaluar el éxito potencial de nuevas tiendas Oxxo, integrando variables clave como ubicación geográfica (latitud, longitud) y entorno (Base, Hogar, Peatonal, Receso). Además de predecir si la tienda será exitosa, el sistema genera un análisis con factores críticos y recomendaciones estratégicas personalizadas mediante un modelo de lenguaje (LLM). La solución incluye visualizaciones interactivas, como mapas y simulaciones de escenarios, para guiar decisiones de inversión. Con este proyecto, ofrecemos una herramienta integral para OXXO que combina precisión técnica con accionabilidad estratégica.
 
 ## 🧰 Tecnologías Usadas
 
-- [Next.js](https://nextjs.org/) – Framework para React
-- [React](https://reactjs.org/) – Biblioteca de interfaces de usuario
+- ### Backend (Python)
+- **Framework**: FastAPI
+- **ML**: XGBoost, Scikit-learn
+- **Geoespacial**: Geopandas, Shapely
+- **Optimización**: SciPy
+- **Serialización**: Joblib, Pickle
+
+### Frontend (JavaScript)
+- **Framework**: Next.js
+- **UI**: React
+- **Visualización**: Leaflet/React-Leaflet
+- **Estilos**: CSS Modules
 
 ## 📦 Instalación
 
-Primero clona el repositorio y entra al directorio del frontend. Luego, instala las dependencias:
+### Requisitos Previos
+- Python 3.9+
+- Node.js 16+
+- PostgreSQL 14+ (opcional para persistencia)
+
+### Configuración
+Clonamos el repositorio:
 ```bash
-npm install
+git clone https://github.com/tu-usuario/dataton-oxxo.git
 ```
 
-Luego, levantar el servidor de desarrollo:
+#### Carpeta backend
 ```bash
+cd dataton-oxxo/backend
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+#### Carpeta frontend
+```bash
+npm install
 npm run dev
 ```
 
-Como ultimo paso, abre tu navegador y entra a:
+### Accedemos al navegador
 ```bash
 http://localhost:3000
 ```
