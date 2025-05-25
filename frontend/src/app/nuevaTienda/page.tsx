@@ -19,6 +19,9 @@ export default function Page() {
   const [tiendas, setTiendas] = useState([]);
   const [recomendaciones, setRecomendaciones] = useState<string>('');
   const [loadingRecomendaciones, setLoadingRecomendaciones] = useState<boolean>(false);
+  
+  // Nuevos estados para el control del mapa
+  const [mapFocusCoordinates, setMapFocusCoordinates] = useState<{lat: number, lng: number, zoom?: number} | null>(null);
 
   // Fetch stores data on component mount
   useEffect(() => {
@@ -88,6 +91,13 @@ DAME UN PÁRRAFO DE RECOMENDACIONES específicas para esta tienda OXXO considera
     setLoading(true);
     setError(null);
     setRecomendaciones(''); // Limpiar recomendaciones anteriores
+
+    // Establecer el foco del mapa en las coordenadas ingresadas
+    setMapFocusCoordinates({
+      lat: Number(latitude),
+      lng: Number(longitude),
+      zoom: 16 // Zoom para ver calles
+    });
 
     try {
       const response = await fetch('http://localhost:8000/api/evaluar', {
@@ -210,10 +220,13 @@ DAME UN PÁRRAFO DE RECOMENDACIONES específicas para esta tienda OXXO considera
           </div>
         </div>
         
-        {/* MAPA SIMPLIFICADO */}
+        {/* MAPA CON ZOOM AUTOMÁTICO */}
         <div className="map-section">
           {tiendas.length > 0 ? (
-            <MapaTiendas data={tiendas} />
+            <MapaTiendas 
+              data={tiendas} 
+              focusCoordinates={mapFocusCoordinates}
+            />
           ) : (
             <div className="map-loading">Cargando mapa...</div>
           )}
