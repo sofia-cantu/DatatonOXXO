@@ -8,12 +8,57 @@ const MapaTiendas = dynamic(
   { ssr: false }
 );
 
+// Tipo para los datos demográficos
+type DemographicData = {
+  poblacion_total: number;
+  total_hogares: number;
+  poblacion_economicamente_activa: number;
+  viviendas_con_automovil: number;
+};
+
+// Tipo para los datos de ventas
+type SalesData = {
+  venta_ultimo_mes: number;
+  promedio_6_meses_previos: number;
+  venta_maxima_historica: number;
+  venta_minima_historica: number;
+  comparativo_vs_promedio_pct: number | null;
+};
+
 export default function Page() {
   const [inputValue, setInputValue] = useState<string>('');
   const [tienda, setTienda] = useState<number | ''>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [tiendas, setTiendas] = useState([]);
+
+  // Metricas de tablas
+  /*
+  const [ventaUltimoMes, setVentaUltimoMes] = useState('$759,744');
+  const [ventaSeisMeses, setVentaSeisMeses] = useState('$1,985,931');
+  const [ventaMaximo, setVentaMaximo] = useState('$2,276,754');
+  const [ventaMinimo, setVentaMinimo] = useState('$759,744');
+  const [comparativoVsPromedio, setComparativoVsPromedio] = useState('61.7%');
+
+  const [perfilPoblacion, setPerfilPoblacion] = useState('2,934');
+  const [perfilHogares, setPerfilHogares] = useState('850.0');
+  const [perfilEconomicaActiva, setPerfilEconomicaActiva] = useState('1,435.0');
+  const [perfilViviendasAuto, setPerfilViviendasAuto] = useState('732.0');
+  */
+  const [salesData, setSalesData] = useState<SalesData | null>(null);
+  const [demographicData, setDemographicData] = useState<DemographicData | null>(null);
+
+  // Formateador de números
+  const formatter = new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+    maximumFractionDigits: 0
+  });
+
+  const percentageFormatter = new Intl.NumberFormat('es-MX', {
+    style: 'percent',
+    maximumFractionDigits: 1
+  });
 
   // Fetch stores data on component mount
     useEffect(() => {
@@ -24,15 +69,48 @@ export default function Page() {
     }, []);
 
   const handleSubmit = async () => {
+    if (!inputValue) return;
+
     setLoading(true);
+    setError(null);
+
     try {
-      const tiendaValue = inputValue === '' ? '' : Number(inputValue);
-      setTienda(tiendaValue);
+      //const tiendaValue = inputValue === '' ? '' : Number(inputValue);
+      //setTienda(tiendaValue);
+      const tiendaId = Number(inputValue);
+      
+      // Llamar a ambos endpoints en paralelo
+      const [salesResponse, demographicResponse] = await Promise.all([
+        fetch(`http://localhost:8000/api/desempeno-ventas/${tiendaId}`),
+        fetch(`http://localhost:8000/api/perfil-demografico/${tiendaId}`)
+      ]);
+
+      if (!salesResponse.ok || !demographicResponse.ok) {
+        throw new Error('Error al obtener datos de la tienda');
+      }
+
+      const salesData: SalesData = await salesResponse.json();
+      const demographicData: DemographicData = await demographicResponse.json();
+
+      setSalesData(salesData);
+      setDemographicData(demographicData);
+      setTienda(tiendaId);
+
     } catch (err) {
-      setError('Ocurrió un error al procesar la tienda');
+      //setError('Ocurrió un error al procesar la tienda');
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setSalesData(null);
+      setDemographicData(null);
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatCurrency = (value: number) => formatter.format(value);
+
+  const formatPercentage = (value: number | null) => {
+    if (value === null) return 'N/A';
+    return percentageFormatter.format(value / 100);
   };
 
   return (
@@ -106,62 +184,66 @@ export default function Page() {
                         </div>
                     </div>
                     </div>
-
                         <table className="tiendas-tabla">
-                            <thead>
-                                <tr>
-                                    <th>Nombre de la Tienda</th>
-                                    <th>Ubicación</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Tienda 1</td>
-                                    <td>Ciudad A</td>
-                                </tr>
-                                <tr>
-                                    <td>Tienda 2</td>
-                                    <td>Ciudad B</td>
-                                </tr>
-                                <tr>
-                                    <td>Tienda 3</td>
-                                    <td>Ciudad C</td>
-                                </tr>
-                                <tr>
-                                    <td>Tienda 4</td>
-                                    <td>Ciudad D</td>
-                                </tr>
-                            </tbody>
+                          <thead>
+                            <tr>
+                              <th>Tipo de venta</th>
+                              <th>Desempeño</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>Último mes</td>
+                              <td>{salesData ? formatCurrency(salesData.venta_ultimo_mes) : 'Cargando...'}</td>
+                            </tr>
+                            <tr>
+                              <td>Promedio 6 meses</td>
+                              <td>{salesData ? formatCurrency(salesData.promedio_6_meses_previos) : 'Cargando...'}</td>
+                            </tr>
+                            <tr>
+                              <td>Máximo histórico</td>
+                              <td>{salesData ? formatCurrency(salesData.venta_maxima_historica) : 'Cargando...'}</td>
+                            </tr>
+                            <tr>
+                              <td>Mínimo histórico</td>
+                              <td>{salesData ? formatCurrency(salesData.venta_minima_historica) : 'Cargando...'}</td>
+                            </tr>
+                            <tr>
+                              <td>Comparativo vs promedio</td>
+                              <td>{salesData ? formatPercentage(salesData.comparativo_vs_promedio_pct) : 'Cargando...'}</td>
+                            </tr>
+                          </tbody>
                         </table>
                 </div>
 
                 <div className="espacio">
                     <table className="tiendas-tabla">
-                        <thead>
-                            <tr>
-                                <th>Nombre de la Tienda</th>
-                                <th>Ubicación</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Tienda 1</td>
-                                <td>Ciudad A</td>
-                            </tr>
-                            <tr>
-                                <td>Tienda 2</td>
-                                <td>Ciudad B</td>
-                            </tr>
-                            <tr>
-                                <td>Tienda 3</td>
-                                <td>Ciudad C</td>
-                            </tr>
-                            <tr>
-                                <td>Tienda 4</td>
-                                <td>Ciudad D</td>
-                            </tr>
-                        </tbody>
+                      <thead>
+                        <tr>
+                          <th>Categoría</th>
+                          <th>Valor</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Población Total (POBTOT)</td>
+                          <td>{demographicData?.poblacion_total.toLocaleString() ?? 'Cargando...'}</td>
+                        </tr>
+                        <tr>
+                          <td>Total de Hogares (TOTHOG)</td>
+                          <td>{demographicData?.total_hogares.toLocaleString() ?? 'Cargando...'}</td>
+                        </tr>
+                        <tr>
+                          <td>Población Econ. Activa (PEA)</td>
+                          <td>{demographicData?.poblacion_economicamente_activa.toLocaleString() ?? 'Cargando...'}</td>
+                        </tr>
+                        <tr>
+                          <td>Viviendas con Auto (VPH_AUTOM)</td>
+                          <td>{demographicData?.viviendas_con_automovil.toLocaleString() ?? 'Cargando...'}</td>
+                        </tr>
+                      </tbody>
                     </table>
+
 
                     <div className="imagen">
                     <p>Grafica de ventas para tienda {tienda}:</p>
@@ -265,7 +347,7 @@ export default function Page() {
         .tiendas-tabla {
             width: 30vw;
             margin: 3rem;
-            margin-top: 5.5rem;
+            margin-top: 4rem; 
             border-collapse: collapse;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f9f9f9; /* gris muy claro */
