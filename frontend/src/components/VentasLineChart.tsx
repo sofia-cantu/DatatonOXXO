@@ -1,4 +1,3 @@
-// src/components/VentasLineChart.tsx
 'use client';
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -50,7 +49,6 @@ const VentasLineChart: React.FC<VentasLineChartProps> = ({ tiendaId }) => {
         const res = await axios.get<VentasResponse>(
           `http://localhost:8000/api/historial-ventas/${tiendaId}`
         );
-
         const historial = res.data.historial_ventas;
 
         const labels = historial.map((item: HistorialVenta) => {
@@ -93,17 +91,76 @@ const VentasLineChart: React.FC<VentasLineChartProps> = ({ tiendaId }) => {
   const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false, // Importante para que respete el contenedor
+    layout: {
+      padding: 20 // Añade padding interno
+    },
     plugins: {
       legend: {
         position: 'top',
+        labels: {
+          padding: 20,
+          font: {
+            size: 14
+          }
+        }
       },
+      tooltip: {
+        titleFont: {
+          size: 14
+        },
+        bodyFont: {
+          size: 13
+        }
+      }
     },
+    scales: {
+      x: {
+        ticks: {
+          font: {
+            size: 12
+          }
+        }
+      },
+      y: {
+        ticks: {
+          font: {
+            size: 12
+          }
+        }
+      }
+    }
   };
 
   if (!chartData) return <p>Cargando gráfico...</p>;
+
   return (
-    <div className="chart-container">
-      <Line data={chartData} options={options} />
+    <div className="chart-wrapper">
+      <div className="chart-container">
+        <Line data={chartData} options={options} />
+      </div>
+      
+      <style jsx>{`
+        .chart-wrapper {
+          width: 100%;
+          height: 100%;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .chart-container {
+          position: relative;
+          width: 100% !important;
+          height: 100% !important;
+          min-height: 350px; /* Altura mínima específica */
+          flex: 1;
+        }
+        
+        .chart-container canvas {
+          width: 100% !important;
+          height: 100% !important;
+        }
+      `}</style>
     </div>
   );
 };

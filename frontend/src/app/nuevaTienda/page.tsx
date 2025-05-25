@@ -17,6 +17,8 @@ export default function Page() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [tiendas, setTiendas] = useState([]);
+  const [recomendaciones, setRecomendaciones] = useState<string>('');
+  const [loadingRecomendaciones, setLoadingRecomendaciones] = useState<boolean>(false);
 
   // Fetch stores data on component mount
   useEffect(() => {
@@ -26,6 +28,57 @@ export default function Page() {
       .catch(() => setTiendas([]));
   }, []);
 
+  const generateRecommendations = async (exito: string, resultadoOptimizado: any) => {
+    setLoadingRecomendaciones(true);
+    try {
+      const prompt = `Basándote en el análisis de ubicación para OXXO:
+
+Estado de la ubicación: ${exito}
+${exito === 'mejorable' ? '(NOTA: Esto significa que es un FRACASO actualmente)' : '(NOTA: Esto significa que es BUENO actualmente)'}
+
+Parámetros optimizados recomendados:
+- Metros cuadrados de ventas: ${resultadoOptimizado.mts2_optimo}
+- Puertas de refrigeración: ${resultadoOptimizado.puertas_refrigeracion_optimo}
+- Cajones de estacionamiento: ${resultadoOptimizado.cajones_estacionamiento_optimo}
+- Probabilidad de éxito optimizada: ${(resultadoOptimizado.probabilidad_optima * 100).toFixed(1)}%
+
+DAME UN PÁRRAFO DE RECOMENDACIONES específicas para esta tienda OXXO considerando estos datos optimizados. Sé directo y práctico.`;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer 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'
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: 200,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error en la API de OpenAI');
+      }
+
+      const data = await response.json();
+      const recommendation = data.choices[0].message.content;
+      setRecomendaciones(recommendation);
+
+    } catch (error) {
+      console.error('Error generando recomendaciones:', error);
+      setRecomendaciones('No se pudieron generar recomendaciones personalizadas en este momento.');
+    } finally {
+      setLoadingRecomendaciones(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (latitude === '' || longitude === '') {
       setError('Por favor, introduce latitud y longitud.');
@@ -34,6 +87,7 @@ export default function Page() {
 
     setLoading(true);
     setError(null);
+    setRecomendaciones(''); // Limpiar recomendaciones anteriores
 
     try {
       const response = await fetch('http://localhost:8000/api/evaluar', {
@@ -59,6 +113,11 @@ export default function Page() {
       // Actualiza el estado con la respuesta de la API
       setPorciento(data.porciento || 0);
       setExito(data.exito || 'mejorable');
+
+      // Generar recomendaciones con OpenAI
+      if (data.detalles && data.detalles.resultado_optimizado) {
+        await generateRecommendations(data.exito, data.detalles.resultado_optimizado);
+      }
       
     } catch (err) {
       console.error('Error al conectar con la API:', err);
@@ -135,7 +194,20 @@ export default function Page() {
               : <>Supera <strong>{porciento}%</strong> de las ventas esperadas para el éxito</>}
           </p>
           <p>El camino al éxito está cerca, por la naturaleza de la zona, te recomendamos tomar lo siguiente en mente:</p>
-          <p>Se recomienda bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla.</p>
+          
+          <div className="recommendations-section">
+            {loadingRecomendaciones ? (
+              <div className="loading-recommendations">
+                <span>Generando recomendaciones personalizadas...</span>
+              </div>
+            ) : recomendaciones ? (
+              <div className="recommendations-content">
+                <p>{recomendaciones}</p>
+              </div>
+            ) : (
+              <p>Presiona el botón para obtener recomendaciones personalizadas.</p>
+            )}
+          </div>
         </div>
         
         {/* MAPA SIMPLIFICADO */}
@@ -282,6 +354,32 @@ export default function Page() {
         .text-block ul {
           list-style: disc;
           margin: 0.625rem 0 1.25rem 1.25rem;
+        }
+
+        /* Recommendations Section */
+        .recommendations-section {
+          margin-top: 1rem;
+          padding: 1rem;
+          background-color: #f8f9fa;
+          border-radius: 0.5rem;
+          border-left: 4px solid #DF0024;
+        }
+
+        .loading-recommendations {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: #666;
+          font-style: italic;
+        }
+
+        .recommendations-content {
+          line-height: 1.6;
+        }
+
+        .recommendations-content p {
+          margin: 0;
+          color: #333;
         }
         
         /* MAPA - CSS SIMPLIFICADO */
