@@ -25,7 +25,7 @@ Este proyecto desarrolla un modelo predictivo para evaluar el éxito potencial d
 - PostgreSQL 14+ (opcional para persistencia)
 
 ### Configuración
-1. Clonar repositorio:
+Clonamos el repositorio:
 ```bash
 git clone https://github.com/tu-usuario/dataton-oxxo.git
 ```
