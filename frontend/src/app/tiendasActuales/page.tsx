@@ -1,12 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+
+const MapaTiendas = dynamic(
+  () => import('@/components/MapaTiendas'),
+  { ssr: false }
+);
 
 export default function Page() {
   const [inputValue, setInputValue] = useState<string>('');
   const [tienda, setTienda] = useState<number | ''>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [tiendas, setTiendas] = useState([]);
+
+  // Fetch stores data on component mount
+    useEffect(() => {
+      fetch('http://localhost:8000/api/tiendas')
+        .then((res) => res.json())
+        .then((data) => setTiendas(data))
+        .catch(() => setTiendas([]));
+    }, []);
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -62,9 +77,18 @@ export default function Page() {
         {tienda === '' ? (
             <div className="noResult">
                 <p>Mapa de todas las tiendas: </p>
-                <div className="map-placeholder">
-                    <div className="map-box">Mapa cargando...</div>
+
+
+                <div className="graph-placeholder">
+                <div className="map-section">
+                  {tiendas.length > 0 ? (
+                    <MapaTiendas data={tiendas} />
+                  ) : (
+                    <div className="map-loading">Cargando mapa...</div>
+                  )}
                 </div>
+                </div>
+                
             </div>
         ) : (
             <div className="totalResult">
@@ -73,7 +97,13 @@ export default function Page() {
                     <div className="imagen">
                     <p>Mapa de todas las tiendas: </p>
                     <div className="graph-placeholder">
-                        <div className="map-box">Mapa cargando...</div>
+                        <div className="map-section">
+                          {tiendas.length > 0 ? (
+                            <MapaTiendas data={tiendas} />
+                          ) : (
+                            <div className="map-loading">Cargando mapa...</div>
+                          )}
+                        </div>
                     </div>
                     </div>
 
@@ -145,7 +175,6 @@ export default function Page() {
             </div>
         )}
 
-        <p>Info info info!</p>
       </main>
 
       <style jsx>{`
@@ -176,6 +205,9 @@ export default function Page() {
             display: flex;
             flex-direction: column;
             margin: 4rem 2rem 6rem 4rem;
+            align-items: center; 
+            font-weight: bold;     
+            font-size: 1.2rem;
         }
 
         .totalResult {
@@ -187,6 +219,12 @@ export default function Page() {
         .espacio {
             display: flex;
             flex-direction: row;
+            margin-bottom: 3rem;
+        }
+
+        .espacio p {
+            font-weight: bold;
+            font-size: 1.2rem;
         }
 
         .map-placeholder {
@@ -194,6 +232,26 @@ export default function Page() {
           display: flex;
           align-items: center;
           justify-content: center;
+        }
+
+        /* MAPA - CSS SIMPLIFICADO */
+        .map-section {
+          flex: 1;
+          height: 23rem; /* o la altura que necesites */
+          min-height: 400px; /* altura mínima */
+          border: 0.7rem solid #DF0024;
+          border-radius: 0.5rem;
+          position: relative; /* importante para Leaflet */
+        }
+
+        .map-loading {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #777;
+          font-style: italic;
         }
         
         .graph-placeholder {
