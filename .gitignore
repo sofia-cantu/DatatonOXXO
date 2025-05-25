@@ -2,3 +2,5 @@
 *.csv
 /Ignore/
 /DSC/
+/backend/**/19*
+/backend/**/28*
