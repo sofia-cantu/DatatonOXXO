@@ -254,10 +254,10 @@ export default function Page() {
 
 
                     <div className="imagen">
-                    <p>Grafica de ventas para tienda {tienda}:</p>
-                    <div className="graph-placeholder">
-                      <VentasLineChart tiendaId={Number(tienda)} />
-                    </div>
+                      <p>Grafica de ventas para tienda: {tienda}:</p>
+                      <div className="graph-placeholder">
+                        <VentasLineChart tiendaId={Number(tienda)} />
+                      </div>
                     </div>
                 </div>
 
