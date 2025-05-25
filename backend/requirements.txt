@@ -1,0 +1,8 @@
+fastapi
+pydantic
+scipy
+scikit-learn
+pandas
+numpy
+geopandas
+shapely

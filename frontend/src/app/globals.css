@@ -1,0 +1,21 @@
+@import 'leaflet/dist/leaflet.css';
+
+.nav {
+  background: #F6D300;
+  padding: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-link {
+  color: black;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  margin: 0 auto;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
