@@ -70,8 +70,8 @@ const VentasLineChart: React.FC<VentasLineChartProps> = ({ tiendaId }) => {
               label: "Venta Total",
               data: ventas,
               fill: true,
-              borderColor: "rgba(75,192,192,1)",
-              backgroundColor: "rgba(75,192,192,0.2)",
+              borderColor: "rgb(197, 136, 23)",
+              backgroundColor: "rgba(255, 218, 33, 0.41)",
               tension: 0.4
             }
           ]
