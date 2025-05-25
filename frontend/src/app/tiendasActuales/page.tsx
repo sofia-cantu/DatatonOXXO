@@ -16,7 +16,6 @@ const VentasLineChart = dynamic(
   }
 );
 
-// Tipo para los datos demográficos
 type DemographicData = {
   poblacion_total: number;
   total_hogares: number;
@@ -24,7 +23,6 @@ type DemographicData = {
   viviendas_con_automovil: number;
 };
 
-// Tipo para los datos de ventas
 type SalesData = {
   venta_ultimo_mes: number;
   promedio_6_meses_previos: number;
@@ -33,30 +31,28 @@ type SalesData = {
   comparativo_vs_promedio_pct: number | null;
 };
 
+type Tienda = {
+  TIENDA_ID: number;
+  LATITUD_NUM: number;
+  LONGITUD_NUM: number;
+  EXITO: number;
+};
+
 export default function Page() {
   const [inputValue, setInputValue] = useState<string>('');
   const [tienda, setTienda] = useState<number | ''>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [tiendas, setTiendas] = useState([]);
-
-  // Metricas de tablas
-  /*
-  const [ventaUltimoMes, setVentaUltimoMes] = useState('$759,744');
-  const [ventaSeisMeses, setVentaSeisMeses] = useState('$1,985,931');
-  const [ventaMaximo, setVentaMaximo] = useState('$2,276,754');
-  const [ventaMinimo, setVentaMinimo] = useState('$759,744');
-  const [comparativoVsPromedio, setComparativoVsPromedio] = useState('61.7%');
-
-  const [perfilPoblacion, setPerfilPoblacion] = useState('2,934');
-  const [perfilHogares, setPerfilHogares] = useState('850.0');
-  const [perfilEconomicaActiva, setPerfilEconomicaActiva] = useState('1,435.0');
-  const [perfilViviendasAuto, setPerfilViviendasAuto] = useState('732.0');
-  */
+  const [tiendas, setTiendas] = useState<Tienda[]>([]);
   const [salesData, setSalesData] = useState<SalesData | null>(null);
   const [demographicData, setDemographicData] = useState<DemographicData | null>(null);
+  const [mapFocusCoordinates, setMapFocusCoordinates] = useState<{
+    lat: number;
+    lng: number;
+    zoom?: number;
+  } | null>(null);
+  const [highlightTiendaId, setHighlightTiendaId] = useState<string | null>(null);
 
-  // Formateador de números
   const formatter = new Intl.NumberFormat('es-MX', {
     style: 'currency',
     currency: 'MXN',
@@ -68,13 +64,12 @@ export default function Page() {
     maximumFractionDigits: 1
   });
 
-  // Fetch stores data on component mount
-    useEffect(() => {
-      fetch('http://localhost:8000/api/tiendas')
-        .then((res) => res.json())
-        .then((data) => setTiendas(data))
-        .catch(() => setTiendas([]));
-    }, []);
+  useEffect(() => {
+    fetch('http://localhost:8000/api/tiendas')
+      .then((res) => res.json())
+      .then((data) => setTiendas(data))
+      .catch(() => setTiendas([]));
+  }, []);
 
   const handleSubmit = async () => {
     if (!inputValue) return;
@@ -83,11 +78,23 @@ export default function Page() {
     setError(null);
 
     try {
-      //const tiendaValue = inputValue === '' ? '' : Number(inputValue);
-      //setTienda(tiendaValue);
-      const tiendaId = Number(inputValue);
-      
-      // Llamar a ambos endpoints en paralelo
+      const tiendaId = inputValue;
+      const selectedStore = tiendas.find(store => 
+        store.TIENDA_ID.toString() === tiendaId
+      );
+
+      if (!selectedStore) {
+        throw new Error('Tienda no encontrada');
+      }
+
+      // Actualizar coordenadas para el mapa
+      setMapFocusCoordinates({
+        lat: selectedStore.LATITUD_NUM,
+        lng: selectedStore.LONGITUD_NUM,
+        zoom: 16
+      });
+      setHighlightTiendaId(tiendaId);
+
       const [salesResponse, demographicResponse] = await Promise.all([
         fetch(`http://localhost:8000/api/desempeno-ventas/${tiendaId}`),
         fetch(`http://localhost:8000/api/perfil-demografico/${tiendaId}`)
@@ -102,13 +109,14 @@ export default function Page() {
 
       setSalesData(salesData);
       setDemographicData(demographicData);
-      setTienda(tiendaId);
+      setTienda(Number(tiendaId));
 
     } catch (err) {
-      //setError('Ocurrió un error al procesar la tienda');
       setError(err instanceof Error ? err.message : 'Error desconocido');
       setSalesData(null);
       setDemographicData(null);
+      setMapFocusCoordinates(null);
+      setHighlightTiendaId(null);
     } finally {
       setLoading(false);
     }
@@ -120,7 +128,6 @@ export default function Page() {
     if (value === null) return 'N/A';
     return percentageFormatter.format(value / 100);
   };
-
   return (
     <div className="container">
       <header className="header">
@@ -182,15 +189,22 @@ export default function Page() {
                 <div className="espacio">
                     <div className="imagen">
                     <p>Mapa de todas las tiendas: </p>
+
                     <div className="graph-placeholder">
                         <div className="map-section">
                           {tiendas.length > 0 ? (
-                            <MapaTiendas data={tiendas} />
+                            <MapaTiendas data={tiendas} 
+                              focusCoordinates={mapFocusCoordinates}
+                              highlightTiendaId={highlightTiendaId}
+                            />
                           ) : (
                             <div className="map-loading">Cargando mapa...</div>
                           )}
                         </div>
                     </div>
+
+     
+
                     </div>
                         <table className="tiendas-tabla">
                           <thead>
