@@ -254,7 +254,7 @@ export default function Page() {
 
 
                     <div className="imagen">
-                      <p>Grafica de ventas para tienda: {tienda}:</p>
+                      <p>Grafica de ventas para la tienda {tienda}:</p>
                       <div className="graph-placeholder">
                         <VentasLineChart tiendaId={Number(tienda)} />
                       </div>
@@ -349,6 +349,22 @@ export default function Page() {
           display: flex;
           align-items: center;
           justify-content: center;
+        }
+
+        /* Agrega estos estilos */
+        .chart-container {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          min-height: 400px; /* Altura mínima para mantener legibilidad */
+        }
+
+        .graph-placeholder {
+          width: 60vw;
+          height: 60vh; /* Agrega altura */
+          min-width: 600px; /* Ancho mínimo */
+          min-height: 400px; /* Altura mínima */
+          padding: 1rem;
         }
 
 

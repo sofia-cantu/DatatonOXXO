@@ -88,12 +88,35 @@ def predecir_y_optimizar_con_recomendacion(lat, lon, entorno, radio_km=5):
 
         venta_real = tienda_cercana.get("VENTA_TOTAL", None)
         meta_real = tienda_cercana.get("Meta_venta", None)
+
+        # Lógica para determinar el éxito y porcentaje
         if venta_real is not None and meta_real is not None and meta_real != 0:
             diferencia = ((venta_real - meta_real) / meta_real) * 100
             if pred_usuario == 1:
-                print(f"Las ventas mejorarían en aproximadamente {diferencia:.2f}%")
+                if prob_init >= 0.9:
+                    mensaje_exito = "excelente"
+                elif prob_init >= 0.75:
+                    mensaje_exito = "buena"
+                else:
+                    mensaje_exito = "regular"
+                porciento = abs(diferencia)
             else:
-                print(f"Las ventas caerían por debajo de la meta en aproximadamente {abs(diferencia):.2f}%")
+                mensaje_exito = "mejorable"
+                porciento = abs(diferencia)
+        else:
+            # Usar la probabilidad del modelo para determinar el éxito
+            if prob_init >= 0.9:
+                mensaje_exito = "excelente"
+                porciento = int((prob_init - 0.9) * 100 / 0.1)  # Porcentaje sobre el umbral de excelencia
+            elif prob_init >= 0.75:
+                mensaje_exito = "buena"
+                porciento = int((prob_init - 0.75) * 100 / 0.15)  # Porcentaje sobre el umbral de buena
+            elif prob_init >= 0.6:
+                mensaje_exito = "regular"
+                porciento = int((prob_init - 0.6) * 100 / 0.15)  # Porcentaje sobre el umbral de regular
+            else:
+                mensaje_exito = "mejorable"
+                porciento = int((0.6 - prob_init) * 100 / 0.6)  # Porcentaje faltante para llegar a regular
 
         print("\n-- RESULTADO OPTIMIZADO --")
         print(f"Mts2 óptimo: {mts2_opt:.2f}")
@@ -125,10 +148,27 @@ def predecir_y_optimizar_con_recomendacion(lat, lon, entorno, radio_km=5):
         else:
             print("\nLa ubicación actual es adecuada. No se encontró mejora significativa en un radio de 5km.")
 
+        # RETORNAR EN EL FORMATO QUE ESPERA EL FRONTEND
         return {
-            "Prediccion inicial": (pred_usuario, prob_init),
-            "Resultado optimizado": (mts2_opt, puertas_opt, cajones_opt, prob_opt),
-            "Recomendacion": mejor_ubicacion
+            "exito": mensaje_exito,
+            "porciento": porciento,
+            "detalles": {
+                "prediccion_inicial": {
+                    "clase": int(pred_usuario),
+                    "probabilidad": float(prob_init)
+                },
+                "resultado_optimizado": {
+                    "mts2_optimo": float(mts2_opt),
+                    "puertas_refrigeracion_optimo": int(puertas_opt),
+                    "cajones_estacionamiento_optimo": int(cajones_opt),
+                    "probabilidad_optima": float(prob_opt) if prob_opt is not None else None
+                },
+                "recomendacion": {
+                    "latitud": float(mejor_ubicacion[0]),
+                    "longitud": float(mejor_ubicacion[1]),
+                    "probabilidad": float(mejor_ubicacion[2])
+                }
+            }
         }
 
     except ValueError as e:

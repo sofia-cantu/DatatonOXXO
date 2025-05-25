@@ -135,11 +135,6 @@ export default function Page() {
               : <>Supera <strong>{porciento}%</strong> de las ventas esperadas para el éxito</>}
           </p>
           <p>El camino al éxito está cerca, por la naturaleza de la zona, te recomendamos tomar lo siguiente en mente:</p>
-          <ul>
-            <li>Punto 1</li>
-            <li>Punto 2</li>
-            <li>Punto 3</li>
-          </ul>
           <p>Se recomienda bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla.</p>
         </div>
         

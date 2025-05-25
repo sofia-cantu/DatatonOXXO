@@ -92,6 +92,7 @@ const VentasLineChart: React.FC<VentasLineChartProps> = ({ tiendaId }) => {
 
   const options: ChartOptions<'line'> = {
     responsive: true,
+    maintainAspectRatio: false, // Importante para que respete el contenedor
     plugins: {
       legend: {
         position: 'top',
@@ -100,10 +101,8 @@ const VentasLineChart: React.FC<VentasLineChartProps> = ({ tiendaId }) => {
   };
 
   if (!chartData) return <p>Cargando gráfico...</p>;
-
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
-      <h3 style={{ textAlign: 'center' }}>Historial de Ventas - Tienda {tiendaId}</h3>
+    <div className="chart-container">
       <Line data={chartData} options={options} />
     </div>
   );
